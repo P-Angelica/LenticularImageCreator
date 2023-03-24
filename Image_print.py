@@ -55,10 +55,9 @@ draw = ImageDraw.Draw(alpha_pattern)
 draw.rectangle( ((0, 0), (int(half_mask-0.5),int(mask_size)) ), fill=(0,0,0,255))
 #alpha_pattern.show()
 
-# Make a new correctly size (4x6) image with a transparency layer
-overall_pattern = Image.new("RGBA", (int(im_width), int(im_height)), (255, 255, 255, 0))
+### --- Make a new correctly size (4x6) image with a transparency layer, ex. 1200x1800 mask of transparent 6 pixel stripes
 ###
-### --- end
+overall_pattern = Image.new("RGBA", (int(im_width), int(im_height)), (255, 255, 255, 0))
 
 ## Need to iterate through pixels in batches, ex. 0 -> 6, 6 -> 12
 ## Taken from: https://stackoverflow.com/questions/8290397/how-to-split-an-iterable-in-constant-size-chunks
@@ -67,15 +66,15 @@ def batch(iterable, n=1):
 	for num in range(0,l,n):
 		yield iterable[num:min(num + n, l)]
 
-### --- Create the full-sized mask for the final image, ex. 1200x1800 mask of transparent 6 pixel stripes
-###
 range_width = list(range(0,im_width))
 range_height = list(range(0, im_height))
 
 #Skip every batch of list items, take the first list item drop a masked pixel until complete
-for b in batch(range_width, int(mask_size)):
-	for a in batch(range_height, int(mask_size)):
+for b in batch(range_height, int(mask_size)):
+	for a in batch(range_width, int(mask_size)):
+		#print(a[0], b[0])
 		overall_pattern.paste(alpha_pattern, (a[0],b[0]))
+#overall_pattern.show()
 ###
 ### --- end
 
