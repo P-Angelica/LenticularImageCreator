@@ -2,6 +2,10 @@ from PIL import Image, ImageDraw
 import sys
 import os
 import random
+import decimal
+
+## Ensure round to even split of 2-image for lens
+decimal.getcontext().rounding = decimal.ROUND_HALF_EVEN
 
 LENS = 50
 DEFAULT_WIDTH = 4
@@ -21,7 +25,7 @@ res = int(sys.argv[3])
 ###
 # Ex. A resolution of 300 dpi(dots per inch) for 50 lpi(lens per inch)
 # Mask = 300/50 = 6 image pixels under 1 lens, for 2-image split that's 3 pixels per image
-mask_size = (res/LENS)
+mask_size = round(res/LENS)
 #print("Mask size:" + str(mask_size))
 
 # Procedure for calculating the FULL pixel size depending on inputted resolution
