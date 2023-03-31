@@ -2,14 +2,28 @@ from PIL import Image, ImageDraw
 import sys
 import os
 import random
-import decimal
-
-## Ensure round to even split of 2-image for lens
-decimal.getcontext().rounding = decimal.ROUND_HALF_EVEN
+import math
 
 LENS = 50
 DEFAULT_WIDTH = 4
 DEFAULT_HEIGHT = 6
+DEFAULT_RATIO = float(2/3)
+SIXTH = float(1/6)
+
+
+## Ensure round to nearest multiple
+#(https://datagy.io/python-round-to-multiple/)
+def round_to_multiple(number, multiple):
+	return multiple *round(number/multiple)
+
+## Calculate area for proper 4x6 crop of original image
+## Assumes the height is larger than width
+def calculate_croparea(image):
+	image_width, image_height = image.size
+	fixed_width = image_height * DEFAULT_RATIO
+	difference_width = (image_width - fixed_width)/2
+	area = (math.floor(difference_width), 0, math.floor(fixed_width+difference_width), image_height)
+	return area
 
 ### -- Entry Information
 if len(sys.argv) != 4:
@@ -25,7 +39,8 @@ res = int(sys.argv[3])
 ###
 # Ex. A resolution of 300 dpi(dots per inch) for 50 lpi(lens per inch)
 # Mask = 300/50 = 6 image pixels under 1 lens, for 2-image split that's 3 pixels per image
-mask_size = round(res/LENS)
+mask_size = math.floor(res/LENS)
+	#decimal.Decimal(res/LENS).quantize(decimal.Decimal('0.00'), rounding=decimal.ROUND_HALF_EVEN)
 #print("Mask size:" + str(mask_size))
 
 # Procedure for calculating the FULL pixel size depending on inputted resolution
@@ -34,17 +49,22 @@ mask_size = round(res/LENS)
 im_width = res*DEFAULT_WIDTH
 im_height = res*DEFAULT_HEIGHT
 pixel_size = (im_width, im_height)
-#print(pixel_size)
+print(pixel_size)
 
-# NEED TO FIX: Correct image sizes to match a 4x6 photo
-# currently I think it transforms the image (ex. making it skinnier)
+## Transforms the image into a scaled version of original 4x6 crop
 im1 = Image.open(image1)
-im1 = im1.resize(pixel_size)
+area1 = calculate_croparea(im1)
+im1 = im1.crop(area1)
+im1 = im1.resize((im_width, im_height),Image.Resampling.LANCZOS)
 
 im2 = Image.open(image2)
-im2 = im2.resize(pixel_size)
+area2 = calculate_croparea(im2)
+im2 = im2.crop(area2)
+im2 = im2.resize((im_width, im_height),Image.Resampling.LANCZOS)
 ###
 ### -- end
+
+#//uncomment below
 
 
 ### --- Similar to photoshop, make a pattern of pixels for interlacing
@@ -85,10 +105,12 @@ for b in batch(range_height, int(mask_size)):
 ### --- Create final image with both images + the mask
 ###
 ## use alpha composite here for im1, 2,
+print(im1.size)
+print(im2.size)
 im3 = Image.composite(im1, im2, overall_pattern)
 #im3.show()
 
 #Save the final image into system folder at the specified resolution from the start
 im3 = im3.save("final_interlace.jpg", dpi=(res,res))
-###
-### -- end
+# ###
+# ### -- end
