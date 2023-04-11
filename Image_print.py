@@ -85,7 +85,7 @@ im3 = im3.resize((im_width, im_height),Image.Resampling.LANCZOS)
 ## ---- New algorithm
 
 ### --- Make a new correctly size (4x6) image with a transparency layer, ex. 1200x1800 mask of transparent 6 pixel stripes
-overall_pattern = Image.new("RGBA", (int(im_width), int(im_height)), (255, 255, 255, 255))
+overall_pattern = Image.new("RGB", (int(im_width), int(im_height)), (255, 255, 255, 255))
 
 ### ---- Make a rectangular mask for pasting image strips ----
 mask_rectangle = Image.new("L", overall_pattern.size, 0)
@@ -108,112 +108,27 @@ for i in range(0, im_width):
 	shifting_Rborder = i
 	column_of_pixel = (i // PIX_PER_COLUMN)
 
-	selection_image = old_pix % NUM_OF_IMG
+	selection_image = column_of_pixel % NUM_OF_IMG
+	print("Selection_image", selection_image)
 	if selection_image == 0:
-		color_r = 255
+		selection_image = im1
 	elif selection_image == 1:
-		color_r = 0
+		selection_image = im2
 	elif selection_image == 2:
-		color_r = 127
+		selection_image = im3
 
 	if old_pix != column_of_pixel:
 		#print("O(p):"+str(old_pix))
-		#print("First XY:",shifting_Lborder,0, "SECOND XY:",shifting_Rborder, im_height)
-		draw_rect.rectangle((shifting_Lborder, 0, shifting_Rborder, im_height), fill=color_r)
+		print("First XY:",shifting_Lborder,0, "SECOND XY:",shifting_Rborder, im_height)
+		# draw_rect.rectangle((shifting_Lborder, 0, shifting_Rborder, im_height), fill=255)
+		# mask_rectangle.save("mask_rectangle.jpg", quality=100)
+		selection_image = selection_image.crop((shifting_Lborder, 0, shifting_Rborder, im_height))
+		overall_pattern.paste(selection_image,(shifting_Lborder, 0, shifting_Rborder, im_height))
 		shifting_Lborder = i;
-		mask_rectangle.save("mask_rectangle.jpg", quality=100)
 
 	old_pix = column_of_pixel
 	images_from_pixel = (column_of_pixel % NUM_OF_LENT)
 	#print(i, images_from_pixel)
 
-mask_rectangle.show()
 
-# overall_pattern.paste(im1, (0,0), mask_rectangle)
-# overall_pattern.save("test_mask.jpg+, quality=100)
-
-# PRE - 4/9
-
-# ## Need to iterate through pixels in batches, ex. 0 -> 6, 6 -> 12
-# ## Taken from: https://stackoverflow.com/questions/8290397/how-to-split-an-iterable-in-constant-size-chunks
-# def batch(iterable, n=1):
-# 	l = len(iterable)
-# 	for num in range(0,l,n):
-# 		yield iterable[num:min(num + n, l)]
-#
-# range_width = list(range(0,im_width))
-# range_height = list(range(0, im_height))
-#
-#
-# #Skip every batch of list items, take the first list item
-# for a in batch(range_width, int(PIX_PER_LENT)):
-# 	print(a[0],0, a[0]+PIX_PER_COLUMN, im_height)
-# 	#overall_pattern.paste([NEW IMAGE HERE], (a[0],im_height))
-#
-# ###
-# ### --- end
-#
-#
-# for y in range(NUM_OF_IMG+1):
-# 		print((math.floor(x/PIX_PER_COLUMN)%200))
-# # 	# run through pixel columns until a complete set of 1
-# # 	# crop the column set and set it on white image
-# # 	# repeat until done
-# # #do next image
-
-
-
-
-
-
-
-# #//OLD CODE below
-#
-#
-# ### --- Similar to photoshop, make a pattern of pixels for interlacing
-# ###
-# # here make the 2-image split, if 6 pixel mask then 3 pixels per image
-# half_mask = int(PIX_PER_LENT/2)
-#
-# # create the transparent mask (0-value at the end), ex. 6 pixels
-# alpha_pattern = Image.new("RGBA", (int(PIX_PER_LENT), int(PIX_PER_LENT)), (255, 255, 255, 0))
-# draw = ImageDraw.Draw(alpha_pattern)
-# #Here rectangle for centering the split subtracts 0.5 to find true "middle" pixel
-# draw.rectangle( ((0, 0), (int(half_mask-0.5),int(PIX_PER_LENT)) ), fill=(0,0,0,255))
-# #alpha_pattern.show()
-#
-# ### --- Make a new correctly size (4x6) image with a transparency layer, ex. 1200x1800 mask of transparent 6 pixel stripes
-# ###
-# overall_pattern = Image.new("RGBA", (int(im_width), int(im_height)), (255, 255, 255, 0))
-#
-# ## Need to iterate through pixels in batches, ex. 0 -> 6, 6 -> 12
-# ## Taken from: https://stackoverflow.com/questions/8290397/how-to-split-an-iterable-in-constant-size-chunks
-# def batch(iterable, n=1):
-# 	l = len(iterable)
-# 	for num in range(0,l,n):
-# 		yield iterable[num:min(num + n, l)]
-#
-# range_width = list(range(0,im_width))
-# range_height = list(range(0, im_height))
-#
-# #Skip every batch of list items, take the first list item drop a masked pixel until complete
-# for b in batch(range_height, int(PIX_PER_LENT)):
-# 	for a in batch(range_width, int(PIX_PER_LENT)):
-# 		#print(a[0], b[0])
-# 		overall_pattern.paste(alpha_pattern, (a[0],b[0]))
-# #overall_pattern.show()
-# ###
-# ### --- end
-#
-# ### --- Create final image with both images + the mask
-# ###
-# ## use alpha composite here for im1, 2,
-# print(im1.size)
-# print(im2.size)
-# im3 = Image.composite(im1, im2, overall_pattern)
-# #im3.show()
-#
-# #Save the final image into system folder at the specified resolution from the start
-# im3 = im3.save("final_interlace.jpg", dpi=(res,res))
-# # ###
-# # ### -- end
+overall_pattern.save("final_interlace.jpg", dpi=(res,res))
