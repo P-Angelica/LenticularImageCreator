@@ -87,16 +87,10 @@ im3 = im3.resize((im_width, im_height),Image.Resampling.LANCZOS)
 ### --- Make a new correctly size (4x6) image with a transparency layer, ex. 1200x1800 mask of transparent 6 pixel stripes
 overall_pattern = Image.new("RGB", (int(im_width), int(im_height)), (255, 255, 255, 255))
 
-### ---- Make a rectangular mask for pasting image strips ----
-mask_rectangle = Image.new("L", overall_pattern.size, 0)
-draw_rect = ImageDraw.Draw(mask_rectangle)
+### ---- Make shifting border variables for crop ----
 shifting_Lborder = 0;
 shifting_Rborder = 0;
-#draw_rect.rectangle((shifting_Lborder,0, shifting_Rborder, im_height), fill=255)
-#mask_rectangle.save("mask_rectangle.jpg", quality=100)
-#mask_rectangle.show()
 
-#overall_pattern.show()
 print("Width of Image:", im_width, end="\n")
 print("Number of Lenticles:", NUM_OF_LENT, end="\n")
 print("Pixels Per Column:", PIX_PER_COLUMN, end="\n")
@@ -109,7 +103,7 @@ for i in range(0, im_width):
 	column_of_pixel = (i // PIX_PER_COLUMN)
 
 	selection_image = column_of_pixel % NUM_OF_IMG
-	print("Selection_image", selection_image)
+	#print("Selection_image", selection_image)
 	if selection_image == 0:
 		selection_image = im1
 	elif selection_image == 1:
@@ -120,8 +114,6 @@ for i in range(0, im_width):
 	if old_pix != column_of_pixel:
 		#print("O(p):"+str(old_pix))
 		print("First XY:",shifting_Lborder,0, "SECOND XY:",shifting_Rborder, im_height)
-		# draw_rect.rectangle((shifting_Lborder, 0, shifting_Rborder, im_height), fill=255)
-		# mask_rectangle.save("mask_rectangle.jpg", quality=100)
 		selection_image = selection_image.crop((shifting_Lborder, 0, shifting_Rborder, im_height))
 		overall_pattern.paste(selection_image,(shifting_Lborder, 0, shifting_Rborder, im_height))
 		shifting_Lborder = i;
