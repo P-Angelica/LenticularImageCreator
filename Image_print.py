@@ -12,7 +12,7 @@ DEFAULT_HEIGHT = 6
 DEFAULT_RATIO = float(2/3)
 SIXTH = float(1/6)
 
-NUM_OF_IMG = 3 ## Should become variable
+MAX_IMG_NUM = 6;
 
 ## Ensure round to nearest multiple
 #(https://datagy.io/python-round-to-multiple/)
@@ -30,18 +30,27 @@ def calculate_croparea(image):
 
 ### -- Entry Information
 ###
-if len(sys.argv) != 5:
-	sys.exit("Add the two images as arguments and an image resolution!")
-image1 = sys.argv[1]
-image2 = sys.argv[2]
-image3 = sys.argv[3]
+if (len(sys.argv) < 4) or (len(sys.argv) > 8):
+	sys.exit("Please input between 2 to 6 images as arguments and an image resolution!\n"
+			 "Input format should be: [image name] [image name] ... [resolution]")
+
+# Determining how many images were provided to interlace, variable
+input_len = len(sys.argv)-1
+NUM_OF_IMG = input_len - 1
+
+images = {}
+for x in range(1, (input_len)):
+	images["image{0}".format(x)] = sys.argv[x]
+
 ## Here we should ensure that the resolution is divisible by LPI 50
-res = int(sys.argv[4])
+res = int(sys.argv[input_len])
 if not(res%LENS == 0):
 	sys.exit(f"Please enter an image resolution that is divisible by {LENS}")
-###
-### -- end
 
+##
+## -- end
+
+## TESTING VARIABLE INPUTS
 
 ### -- To create the alpha pattern, we need to know how many pixels for lens
 ###
@@ -63,25 +72,19 @@ im_height = res*DEFAULT_HEIGHT
 pixel_size = (im_width, im_height)
 print(pixel_size)
 
-## Transforms the image into a scaled version of original 4x6 crop
-im1 = Image.open(image1)
-area1 = calculate_croparea(im1)
-im1 = im1.crop(area1)
-im1 = im1.resize((im_width, im_height),Image.Resampling.LANCZOS)
+## Transforms the image into a scaled version of original 4x6 crop, variable
 
-im2 = Image.open(image2)
-area2 = calculate_croparea(im2)
-im2 = im2.crop(area2)
-im2 = im2.resize((im_width, im_height),Image.Resampling.LANCZOS)
+for key in images:
+	edit_im = Image.open(images[key])
+	area = calculate_croparea(edit_im)
+	edit_im = edit_im.crop(area)
+	edit_im = edit_im.resize((im_width, im_height),Image.Resampling.LANCZOS)
+	images[key] = edit_im
 
-
-im3 = Image.open(image3)
-area3 = calculate_croparea(im3)
-im3 = im3.crop(area3)
-im3 = im3.resize((im_width, im_height),Image.Resampling.LANCZOS)
 ###
 ### -- end
 
+################# UNCOMMENT LATER ##########################################################################
 ## ---- New algorithm
 
 ### --- Make a new correctly size (4x6) image with a transparency layer, ex. 1200x1800 mask of transparent 6 pixel stripes
@@ -94,22 +97,15 @@ shifting_Rborder = 0;
 print("Width of Image:", im_width, end="\n")
 print("Number of Lenticles:", NUM_OF_LENT, end="\n")
 print("Pixels Per Column:", PIX_PER_COLUMN, end="\n")
+
 old_pix = 0
-
-
-
 for i in range(0, im_width):
 	shifting_Rborder = i
 	column_of_pixel = (i // PIX_PER_COLUMN)
 
 	selection_image = column_of_pixel % NUM_OF_IMG
 	#print("Selection_image", selection_image)
-	if selection_image == 0:
-		selection_image = im1
-	elif selection_image == 1:
-		selection_image = im2
-	elif selection_image == 2:
-		selection_image = im3
+	selection_image = images["image"+str(int(selection_image)+1)]
 
 	if old_pix != column_of_pixel:
 		#print("O(p):"+str(old_pix))
@@ -120,7 +116,7 @@ for i in range(0, im_width):
 
 	old_pix = column_of_pixel
 	images_from_pixel = (column_of_pixel % NUM_OF_LENT)
-	#print(i, images_from_pixel)
+	print(i, images_from_pixel)
 
 
 overall_pattern.save("final_interlace.jpg", dpi=(res,res))
