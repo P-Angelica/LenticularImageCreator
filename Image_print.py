@@ -99,24 +99,32 @@ print("Number of Lenticles:", NUM_OF_LENT, end="\n")
 print("Pixels Per Column:", PIX_PER_COLUMN, end="\n")
 
 old_pix = 0
+## Make into a function ##
 for i in range(0, im_width):
 	shifting_Rborder = i
-	column_of_pixel = (i // PIX_PER_COLUMN)
 
-	selection_image = column_of_pixel % NUM_OF_IMG
-	#print("Selection_image", selection_image)
+	### Make into a function ###
+	column_of_pixel = (i // PIX_PER_COLUMN) # C(P) = p / a = i / 2
+	selection_image = column_of_pixel % NUM_OF_IMG #new? S(c(p)) = c(p) % 3
+	#########################################
+
+	# images_from_pixel = (column_of_pixel % NUM_OF_LENT)
+	# print("Selection_image:", selection_image) ## gives 0, 1, 2
+	# print("Image from pixel:", images_from_pixel) ## cycles through 1-200, depending on resolution so 3x if 300
 	selection_image = images["image"+str(int(selection_image)+1)]
 
-	if old_pix != column_of_pixel:
-		#print("O(p):"+str(old_pix))
-		print("First XY:",shifting_Lborder,0, "SECOND XY:",shifting_Rborder, im_height)
-		selection_image = selection_image.crop((shifting_Lborder, 0, shifting_Rborder, im_height))
-		overall_pattern.paste(selection_image,(shifting_Lborder, 0, shifting_Rborder, im_height))
-		shifting_Lborder = i;
+	selection_image = selection_image.crop((i, 0, i+1, im_height))
+	overall_pattern.paste(selection_image,(i, 0, i+1, im_height))
 
-	old_pix = column_of_pixel
-	images_from_pixel = (column_of_pixel % NUM_OF_LENT)
-	print(i, images_from_pixel)
+	# if old_pix != column_of_pixel:
+	# 	#print("O(p):"+str(old_pix))
+	# 	print("First XY:",shifting_Lborder,0, "SECOND XY:",shifting_Rborder, im_height)
+	# 	selection_image = selection_image.crop((shifting_Lborder, 0, shifting_Rborder, im_height))
+	# 	overall_pattern.paste(selection_image,(shifting_Lborder, 0, shifting_Rborder, im_height))
+	# 	shifting_Lborder = i;
+	#
+	# old_pix = column_of_pixel
+	#print(i, images_from_pixel)
 
 
 overall_pattern.save("final_interlace.jpg", dpi=(res,res))
