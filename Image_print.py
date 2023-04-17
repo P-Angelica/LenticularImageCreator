@@ -60,14 +60,15 @@ if (len(sys.argv) < 4) or (len(sys.argv) > 8):
 
 # Determining how many images were provided to interlace, variable
 # original count includes the .py file, so subtract 1
-input_len = len(sys.argv)-1
+input_len = len(sys.argv) - 1
 # Subtract the res number attached at the end
 NUM_OF_IMG = input_len - 1
 
+# Assign a dictionary item to input image
 for x in range(1, (input_len)):
 	images["image{0}".format(x)] = sys.argv[x]
 
-## Here we should ensure that the resolution is divisible by LPI 50
+## Here we should ensure that the resolution is divisible by LPI 50 (need to confirm)
 res = int(sys.argv[input_len])
 if not(res%LENS == 0):
 	sys.exit(f"Please enter an image resolution that is divisible by {LENS}")
@@ -77,8 +78,8 @@ if not(res%LENS == 0):
 
 ## TESTING VARIABLE INPUTS
 
-### -- To create the alpha pattern, we need to know how many pixels for lens
-###
+### --
+
 # Ex. A resolution of 300 dpi(dots per inch) for 50 lpi(lens per inch)
 # Pixels available under 1 lenticle = 300/50 = 6 image pixels under 1
 PIX_PER_LENT = math.floor(res/LENS)
