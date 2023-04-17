@@ -4,6 +4,10 @@ import os
 import random
 import math
 
+
+### VARIABLES ###
+##
+
 LENS = 50
 NUM_OF_LENT = 200;
 
@@ -13,6 +17,15 @@ DEFAULT_RATIO = float(2/3)
 SIXTH = float(1/6)
 
 MAX_IMG_NUM = 6;
+
+NUM_OF_IMG = 0;
+images = {}
+
+##################################
+##################################
+
+### FUNCTIONS ###
+##
 
 ## Ensure round to nearest multiple
 #(https://datagy.io/python-round-to-multiple/)
@@ -28,17 +41,29 @@ def calculate_croparea(image):
 	area = (math.floor(difference_width), 0, math.floor(fixed_width+difference_width), image_height)
 	return area
 
-### -- Entry Information
+## Select image to extract pixel column
+def select_image(count):
+	column_of_pixel = (count // PIX_PER_COLUMN) # C(P) = p / a = count / 2
+	selection_image = column_of_pixel % NUM_OF_IMG #S(c(p)) = c(p) % 3
+	print("image"+str(int(selection_image)+1))
+	selection_image = images["image"+str(int(selection_image)+1)]
+	return selection_image
+
+#######################################################################################################
+#######################################################################################################
+
+### -- Input Information -- ###
 ###
 if (len(sys.argv) < 4) or (len(sys.argv) > 8):
 	sys.exit("Please input between 2 to 6 images as arguments and an image resolution!\n"
 			 "Input format should be: [image name] [image name] ... [resolution]")
 
 # Determining how many images were provided to interlace, variable
+# original count includes the .py file, so subtract 1
 input_len = len(sys.argv)-1
+# Subtract the res number attached at the end
 NUM_OF_IMG = input_len - 1
 
-images = {}
 for x in range(1, (input_len)):
 	images["image{0}".format(x)] = sys.argv[x]
 
@@ -47,8 +72,8 @@ res = int(sys.argv[input_len])
 if not(res%LENS == 0):
 	sys.exit(f"Please enter an image resolution that is divisible by {LENS}")
 
-##
-## -- end
+#######################################################################################################
+#######################################################################################################
 
 ## TESTING VARIABLE INPUTS
 
@@ -57,7 +82,7 @@ if not(res%LENS == 0):
 # Ex. A resolution of 300 dpi(dots per inch) for 50 lpi(lens per inch)
 # Pixels available under 1 lenticle = 300/50 = 6 image pixels under 1
 PIX_PER_LENT = math.floor(res/LENS)
-print("Lenticle image size:" + str(PIX_PER_LENT))
+#print("Lenticle image size:" + str(PIX_PER_LENT))
 
 ## Number of pixels of 1 image per lenticle
 # Ex. If above (300/50) is 6 pixels per lenticle,
@@ -73,7 +98,6 @@ pixel_size = (im_width, im_height)
 print(pixel_size)
 
 ## Transforms the image into a scaled version of original 4x6 crop, variable
-
 for key in images:
 	edit_im = Image.open(images[key])
 	area = calculate_croparea(edit_im)
@@ -84,7 +108,6 @@ for key in images:
 ###
 ### -- end
 
-################# UNCOMMENT LATER ##########################################################################
 ## ---- New algorithm
 
 ### --- Make a new correctly size (4x6) image with a transparency layer, ex. 1200x1800 mask of transparent 6 pixel stripes
@@ -95,36 +118,18 @@ shifting_Lborder = 0;
 shifting_Rborder = 0;
 
 print("Width of Image:", im_width, end="\n")
-print("Number of Lenticles:", NUM_OF_LENT, end="\n")
+# print("Number of Lenticles:", NUM_OF_LENT, end="\n")
 print("Pixels Per Column:", PIX_PER_COLUMN, end="\n")
 
-old_pix = 0
-## Make into a function ##
+## Count through image resolution width and assign an input image
 for i in range(0, im_width):
-	shifting_Rborder = i
 
-	### Make into a function ###
-	column_of_pixel = (i // PIX_PER_COLUMN) # C(P) = p / a = i / 2
-	selection_image = column_of_pixel % NUM_OF_IMG #new? S(c(p)) = c(p) % 3
-	#########################################
+	## Run algorithm to select input image for final image ###
+	selection_image = select_image(i)
 
-	# images_from_pixel = (column_of_pixel % NUM_OF_LENT)
-	# print("Selection_image:", selection_image) ## gives 0, 1, 2
-	# print("Image from pixel:", images_from_pixel) ## cycles through 1-200, depending on resolution so 3x if 300
-	selection_image = images["image"+str(int(selection_image)+1)]
-
+	## Crop a column of the selected image and paste onto final image
 	selection_image = selection_image.crop((i, 0, i+1, im_height))
 	overall_pattern.paste(selection_image,(i, 0, i+1, im_height))
 
-	# if old_pix != column_of_pixel:
-	# 	#print("O(p):"+str(old_pix))
-	# 	print("First XY:",shifting_Lborder,0, "SECOND XY:",shifting_Rborder, im_height)
-	# 	selection_image = selection_image.crop((shifting_Lborder, 0, shifting_Rborder, im_height))
-	# 	overall_pattern.paste(selection_image,(shifting_Lborder, 0, shifting_Rborder, im_height))
-	# 	shifting_Lborder = i;
-	#
-	# old_pix = column_of_pixel
-	#print(i, images_from_pixel)
-
-
+## Save final version
 overall_pattern.save("final_interlace.jpg", dpi=(res,res))
