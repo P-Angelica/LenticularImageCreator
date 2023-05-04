@@ -8,15 +8,14 @@ import math
 ### VARIABLES ###
 ##
 
-LENS = 50
+LENS = 49.6
 NUM_OF_LENT = 200;
 
 DEFAULT_WIDTH = 4
 DEFAULT_HEIGHT = 6
 DEFAULT_RATIO = float(2/3)
-SIXTH = float(1/6)
 
-MAX_IMG_NUM = 6;
+MAX_IMG_NUM = 11;
 
 NUM_OF_IMG = 0;
 images = {}
@@ -43,7 +42,7 @@ def calculate_croparea(image):
 
 ## Select image to extract pixel column
 def select_image(count):
-	column_of_pixel = (count // PIX_PER_COLUMN) # C(P) = p / a = count / 2
+	column_of_pixel = (count // PIX_PER_COLUMN) # C(P) = floor( p / a )= count / 2
 	selection_image = column_of_pixel % NUM_OF_IMG #S(c(p)) = c(p) % 3
 	print("image"+str(int(selection_image)+1))
 	selection_image = images["image"+str(int(selection_image)+1)]
@@ -54,24 +53,25 @@ def select_image(count):
 
 ### -- Input Information -- ###
 ###
-if (len(sys.argv) < 4) or (len(sys.argv) > 8):
-	sys.exit("Please input between 2 to 6 images as arguments and an image resolution!\n"
-			 "Input format should be: [image name] [image name] ... [resolution]")
+if (len(sys.argv) < 5) or (len(sys.argv) > MAX_IMG_NUM+3):
+	sys.exit(f"Please input between 2 to {MAX_IMG_NUM} images as argument, a printer resolution, and a lenticular size!\n"
+			 "Input format should be: [image name] [image name] ... [printer resolution][lens per inch]")
 
 # Determining how many images were provided to interlace, variable
 # original count includes the .py file, so subtract 1
 input_len = len(sys.argv) - 1
-# Subtract the res number attached at the end
-NUM_OF_IMG = input_len - 1
+# Subtract the res number and LPI attached at the end
+NUM_OF_IMG = input_len - 2
 
 # Assign a dictionary item to input image
-for x in range(1, (input_len)):
+for x in range(1, (NUM_OF_IMG+1)):
 	images["image{0}".format(x)] = sys.argv[x]
 
-## Here we should ensure that the resolution is divisible by LPI 50 (need to confirm)
-res = int(sys.argv[input_len])
-if not(res%LENS == 0):
-	sys.exit(f"Please enter an image resolution that is divisible by {LENS}")
+## Here we should ensure that the resolution is divisible by provided LPI
+res = int(sys.argv[input_len-1])
+LENS = int(sys.argv[input_len])
+# if not(res%LENS == 0):
+# 	sys.exit(f"Please enter an image resolution that is divisible by {LENS}")
 
 #######################################################################################################
 #######################################################################################################
@@ -82,7 +82,10 @@ if not(res%LENS == 0):
 
 # Ex. A resolution of 300 dpi(dots per inch) for 50 lpi(lens per inch)
 # Pixels available under 1 lenticle = 300/50 = 6 image pixels under 1
-PIX_PER_LENT = math.floor(res/LENS)
+""" COME BACK HERE ASAP """
+PIX_PER_LENT = res/LENS
+#PIX_PER_LENT = math.floor(res/LENS)
+print(PIX_PER_LENT)
 #print("Lenticle image size:" + str(PIX_PER_LENT))
 
 ## Number of pixels of 1 image per lenticle
