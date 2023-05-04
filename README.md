@@ -23,7 +23,8 @@ GUI located in app.py, but not complete as of 5/4/23
 ### Executing program
  
 To execute the program please provide the follow command line arguments:
-python main.py [image 1] [image 2] [image 3] [desired DPI] [ LPI ]
+
+python Image_prep.py [image 1] [image 2] [image 3] [desired DPI] [ LPI ]
 
 where DPI stands for the printer resolution and LPI stands for the lenticulars per inch 
 of the lenticular sheet
@@ -37,10 +38,6 @@ ex. [@angelica_pelcastre](https://www.instagram.com/angelica_pelcastre/)
 
 * 1.0
     * Initial Release
-
-## License
-
-This project is licensed under the [NAME HERE] License - see the LICENSE.md file for details
 
 ## Acknowledgments
 Thank you to my advisor Dr. Alan Weide and all CPSC 490 admin
