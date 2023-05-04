@@ -1,4 +1,4 @@
-# Project Name: A Desktop Interface to Create and Display Lenticular Images
+# A Desktop Interface to Create and Display Lenticular Images
 
 ## Abstract 
 
